@@ -840,6 +840,7 @@
             <div class="storyline-wrapper"> <p class="detail-storyline" id="series-detail-storyline"></p> </div>
             <div class="secondary-actions-container">
                  <div class="action-icon-btn" id="series-detail-watchlist-btn"> <i class="fas fa-plus"></i> <span>My List</span> </div>
+                 <div class="action-icon-btn" id="series-detail-download-btn" onclick="openDownloadModalWithAd()"> <i class="fas fa-download"></i> <span>Download</span> </div>
                  <div class="action-icon-btn" id="series-detail-share-btn"> <i class="fas fa-share"></i> <span>Share</span> </div>
             </div>
         </div>
@@ -1555,7 +1556,7 @@
     //  REWARDED AD SYSTEM
     //  One global ad link — swap this URL to change the ad everywhere.
     // ══════════════════════════════════════════════════════════════
-    const AD_LINK = 'https://www.profitablecpmratenetwork.com/hehbrth0r1?key=b26becb3c70c370277238cc0fb4e18e3'; // ← replace with your Adsterra / ad-network URL
+    const AD_LINK = 'https://www.profitablegatecpm.com/qmd7phfm6?key=df9da1dbf5a9ff53c16f1890e68af3bc'; // ← replace with your Adsterra / ad-network URL
 
     /**
      * handleAction(actionKey, callback)
@@ -2336,12 +2337,16 @@
     }
     
     function playSeriesEpisode(seriesItem, episode) {
-        currentContent = seriesItem;
-        addToWatchHistory(seriesItem);
-        ['home-page', 'detail-page', 'series-detail-page'].forEach(id => document.getElementById(id).style.display = 'none');
-        document.getElementById('bottom-nav').style.display = 'none';
-        document.getElementById('series-player-page').style.display = 'flex';
-        switchSeriesEpisodeInPlayer(seriesItem, episode);
+        // Ad gate — only on first tap per episode per session
+        const actionKey = 'play_' + (seriesItem.id || seriesItem.title) + '_S' + episode.season + 'E' + episode.episode;
+        handleAction(actionKey, () => {
+            currentContent = seriesItem;
+            addToWatchHistory(seriesItem);
+            ['home-page', 'detail-page', 'series-detail-page'].forEach(id => document.getElementById(id).style.display = 'none');
+            document.getElementById('bottom-nav').style.display = 'none';
+            document.getElementById('series-player-page').style.display = 'flex';
+            switchSeriesEpisodeInPlayer(seriesItem, episode);
+        });
     }
     
     function switchSeriesEpisodeInPlayer(seriesItem, episode) {
@@ -2364,7 +2369,10 @@
         seriesPlayer.on('ended', () => {
             if (document.getElementById('series-autoplay-switch').checked) {
                 const nextEp = findNextEpisode(seriesItem, episode);
-                if (nextEp) switchSeriesEpisodeInPlayer(seriesItem, nextEp);
+                if (nextEp) {
+                    const nextKey = 'play_' + (seriesItem.id || seriesItem.title) + '_S' + nextEp.season + 'E' + nextEp.episode;
+                    handleAction(nextKey, () => switchSeriesEpisodeInPlayer(seriesItem, nextEp));
+                }
                 else showToast("You've finished the series!");
             }
         });
@@ -2405,7 +2413,10 @@
                 <div class="episode-details">
                     <div class="title">E${ep.episode}: ${ep.title || 'Episode ' + ep.episode}</div>
                 </div>`;
-            epItem.onclick = () => switchSeriesEpisodeInPlayer(seriesItem, ep);
+            epItem.onclick = () => {
+                const epKey = 'play_' + (seriesItem.id || seriesItem.title) + '_S' + ep.season + 'E' + ep.episode;
+                handleAction(epKey, () => switchSeriesEpisodeInPlayer(seriesItem, ep));
+            };
             list.appendChild(epItem);
         });
         episodeListContainer.appendChild(list);
