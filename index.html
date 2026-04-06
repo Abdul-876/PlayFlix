@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlayFlix</title>
+    <title>Flixvora</title>
     <!-- Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
@@ -118,10 +118,10 @@
     .header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; position: absolute; top: 0; left: 0; right: 0; z-index: 100; background: transparent; }
     .header.scrolled { background-color: rgba(11,11,11,0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
 
-    /* Logo – big bold PLAYFLIX style */
+    /* Logo – big bold FLIXVORA style */
     .logo { font-size: 26px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
     .logo .movie-text { color: white; }
-    .logo .hunt-text { color: var(--primary-color); } /* Show full PLAYFLIX */
+    .logo .hunt-text { color: var(--primary-color); } /* Show full FLIXVORA */
 
     /* Search bar center */
     .header-search-bar { flex: 1; margin: 0 10px; background: rgba(255,255,255,0.14); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; display: flex; align-items: center; padding: 9px 16px; gap: 8px; cursor: pointer; }
@@ -610,7 +610,7 @@
 
     <div id="loading-page">
         <div class="logo">
-            <span class="movie-text">P</span><span class="hunt-text" style="display:inline;color:white;font-weight:900;">LAY</span><span class="hunt-text">FLIX</span>
+            <span class="hunt-text">FLIX</span><span class="movie-text">VORA</span>
         </div>
     </div>
 
@@ -618,7 +618,7 @@
         <div id="login-page-pro" class="auth-page">
             <div class="auth-logo">
                 <div class="logo">
-                    <span class="movie-text">P</span><span class="hunt-text" style="display:inline;color:white;font-weight:900;">LAY</span><span class="hunt-text">FLIX</span>
+                    <span class="hunt-text">FLIX</span><span class="movie-text">VORA</span>
                 </div>
             </div>
             <div class="auth-form">
@@ -636,7 +636,7 @@
         <div id="signup-page-pro" class="auth-page hidden">
             <div class="auth-logo">
                 <div class="logo">
-                     <span class="movie-text">P</span><span class="hunt-text" style="display:inline;color:white;font-weight:900;">LAY</span><span class="hunt-text">FLIX</span>
+                     <span class="hunt-text">FLIX</span><span class="movie-text">VORA</span>
                 </div>
             </div>
             <div class="auth-form">
@@ -656,7 +656,7 @@
     <div id="home-page">
         <header class="header" id="home-header">
             <div class="logo">
-                <span class="movie-text">P</span><span class="hunt-text" style="display:inline;color:white;font-weight:900;">LAY</span><span class="hunt-text">FLIX</span>
+                <span class="hunt-text">FLIX</span><span class="movie-text">VORA</span>
             </div>
             <div class="header-search-bar" onclick="navigateTo('search')">
                 <i class="fas fa-search"></i>
@@ -1411,7 +1411,7 @@
 
     async function shareContent(item) {
         if (!item) return;
-        const shareData = { title: item.title || item.name, text: `Check out "${item.title || item.name}" on HaiFlix!`, url: window.location.href };
+        const shareData = { title: item.title || item.name, text: `Check out "${item.title || item.name}" on Flixvora!`, url: window.location.href };
         if (navigator.share) {
             try { await navigator.share(shareData); } catch (err) { console.error('Error sharing content:', err); }
         } else {
@@ -1572,6 +1572,7 @@
     function removeFromWatchlist(index) { watchlist.splice(index, 1); localStorage.setItem('moviehunt_watchlist', JSON.stringify(watchlist)); renderWatchlistPage(); }
     
     // ══════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════
     //  REWARDED AD SYSTEM
     //  One global ad link — swap this URL to change the ad everywhere.
     // ══════════════════════════════════════════════════════════════
@@ -1679,7 +1680,7 @@
         if (container && !container.querySelector('.plyr__watermark')) {
             const watermark = document.createElement('div');
             watermark.className = 'plyr__watermark';
-            watermark.innerHTML = `PLAY<span class="hunt-text">FLIX</span>`;
+            watermark.innerHTML = `<span class="hunt-text">FLIX</span><span style="color:white;font-weight:900;">VORA</span>`;
             container.appendChild(watermark);
         }
     }
