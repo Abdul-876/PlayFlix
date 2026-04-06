@@ -965,6 +965,25 @@
         </div>
     </div>
 
+    <!-- Video Guide Popup -->
+<div id="video-guide-backdrop" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:2000;backdrop-filter:blur(4px);"></div>
+<div id="video-guide-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);max-width:420px;width:92%;background:#141414;border:1px solid rgba(255,255,255,0.12);border-top:3px solid var(--primary-color);border-radius:20px;padding:28px 22px 24px;z-index:2001;text-align:center;">
+    <div style="width:60px;height:60px;border-radius:50%;background:rgba(229,9,20,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <i class="fas fa-exclamation-circle" style="font-size:26px;color:var(--primary-color);"></i>
+    </div>
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:10px;color:#fff;">Video Nahi Chal Raha? 🎬</h3>
+    <p style="font-size:14px;color:#b0b0b0;line-height:1.7;margin-bottom:20px;">
+        Agar <strong style="color:#fff;">video player me video play nahi ho raha</strong> ya buffering ho rahi hai, to <strong style="color:var(--primary-color);">Download button</strong> use karke movie/episode download kar lo aur phir dekho.<br><br>
+        <span style="font-size:12px;opacity:0.7;">Best Experience ke liye WiFi use karo 📶</span>
+    </p>
+    <button onclick="closeVideoGuide()" style="width:100%;padding:14px;background:var(--primary-color);border:none;border-radius:50px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:Poppins,sans-serif;letter-spacing:0.3px;">
+        Samajh Gaya, Play Karo ▶
+    </button>
+    <button onclick="closeVideoGuide()" style="width:100%;padding:10px;background:transparent;border:none;color:#888;font-size:13px;cursor:pointer;margin-top:10px;font-family:Poppins,sans-serif;">
+        Skip
+    </button>
+</div>
+
     <!-- Download Modal -->
 <div id="download-modal-backdrop" class="modal-backdrop" onclick="closeDownloadModal()" style="z-index:1200;"></div>
 <div id="download-modal" style="display:none;position:fixed;bottom:0;left:0;max-width:480px;margin:0 auto;right:0;background:var(--card-bg);z-index:1300;border-top:2px solid var(--primary-color);border-top-left-radius:24px;border-top-right-radius:24px;padding:28px 20px 36px;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);">
@@ -979,9 +998,9 @@
         <p style="color:var(--text-secondary);font-size:14px;">No download links available for this title.</p>
     </div>
 
-    <!-- Dynamic quality buttons -->
+    <!-- Dynamic quality/episode buttons -->
     <div id="dl-links-container" style="display:none;">
-        <p style="font-size:12px;font-weight:600;color:var(--text-secondary);letter-spacing:0.8px;margin-bottom:14px;text-transform:uppercase;">Select Quality</p>
+        <p id="dl-section-label" style="font-size:12px;font-weight:600;color:var(--text-secondary);letter-spacing:0.8px;margin-bottom:14px;text-transform:uppercase;">Select Episode</p>
         <div id="dl-quality-buttons" style="display:flex;flex-direction:column;gap:10px;"></div>
     </div>
 
@@ -1556,7 +1575,7 @@
     //  REWARDED AD SYSTEM
     //  One global ad link — swap this URL to change the ad everywhere.
     // ══════════════════════════════════════════════════════════════
-    const AD_LINK = 'https://balancedsuppercreed.com/hehbrth0r1?key=b26becb3c70c370277238cc0fb4e18e3'; // ← replace with your Adsterra / ad-network URL
+    const AD_LINK = 'https://www.profitablegatecpm.com/qmd7phfm6?key=df9da1dbf5a9ff53c16f1890e68af3bc'; // ← replace with your Adsterra / ad-network URL
 
     /**
      * handleAction(actionKey, callback)
@@ -1615,8 +1634,16 @@
         const actionKey = 'play_' + (item.id || item.title || 'movie');
         handleAction(actionKey, () => {
             const link = item.link;
-            if (link) { addToWatchHistory(item); showMoviePlayer(item); }
-            else { alert('No content available to play.'); }
+            if (link) {
+                addToWatchHistory(item);
+                const guideShown = sessionStorage.getItem('pf_guide_shown');
+                if (!guideShown) {
+                    sessionStorage.setItem('pf_guide_shown', '1');
+                    showVideoGuide(() => showMoviePlayer(item));
+                } else {
+                    showMoviePlayer(item);
+                }
+            } else { alert('No content available to play.'); }
         });
     }
 
@@ -2337,15 +2364,23 @@
     }
     
     function playSeriesEpisode(seriesItem, episode) {
-        // Ad gate — only on first tap per episode per session
         const actionKey = 'play_' + (seriesItem.id || seriesItem.title) + '_S' + episode.season + 'E' + episode.episode;
         handleAction(actionKey, () => {
-            currentContent = seriesItem;
-            addToWatchHistory(seriesItem);
-            ['home-page', 'detail-page', 'series-detail-page'].forEach(id => document.getElementById(id).style.display = 'none');
-            document.getElementById('bottom-nav').style.display = 'none';
-            document.getElementById('series-player-page').style.display = 'flex';
-            switchSeriesEpisodeInPlayer(seriesItem, episode);
+            const doPlay = () => {
+                currentContent = seriesItem;
+                addToWatchHistory(seriesItem);
+                ['home-page', 'detail-page', 'series-detail-page'].forEach(id => document.getElementById(id).style.display = 'none');
+                document.getElementById('bottom-nav').style.display = 'none';
+                document.getElementById('series-player-page').style.display = 'flex';
+                switchSeriesEpisodeInPlayer(seriesItem, episode);
+            };
+            const guideShown = sessionStorage.getItem('pf_guide_shown');
+            if (!guideShown) {
+                sessionStorage.setItem('pf_guide_shown', '1');
+                showVideoGuide(doPlay);
+            } else {
+                doPlay();
+            }
         });
     }
     
@@ -2606,6 +2641,24 @@
     }
 
     // ── Rewarded wrapper for Download ──────────────────────────────
+    function showVideoGuide(onConfirm) {
+        const backdrop = document.getElementById('video-guide-backdrop');
+        const modal = document.getElementById('video-guide-modal');
+        backdrop.style.display = 'block';
+        modal.style.display = 'block';
+        // Store callback
+        window._videoGuideCallback = onConfirm;
+    }
+
+    function closeVideoGuide() {
+        document.getElementById('video-guide-backdrop').style.display = 'none';
+        document.getElementById('video-guide-modal').style.display = 'none';
+        if (typeof window._videoGuideCallback === 'function') {
+            window._videoGuideCallback();
+            window._videoGuideCallback = null;
+        }
+    }
+
     function openDownloadModalWithAd() {
         const contentId = (currentContent && (currentContent.id || currentContent.title)) || 'download';
         const actionKey = 'dl_modal_' + contentId;
@@ -2619,15 +2672,16 @@
         const linksContainer = document.getElementById('dl-links-container');
         const buttonsDiv = document.getElementById('dl-quality-buttons');
         const titleEl = document.getElementById('dl-movie-title');
+        const sectionLabel = document.getElementById('dl-section-label');
 
-        // Set movie title
+        // Set movie/series title
         const title = (currentContent && (currentContent.title || currentContent.name)) || document.getElementById('detail-title').textContent || 'Movie';
         titleEl.textContent = title;
 
         // Clear previous buttons
         buttonsDiv.innerHTML = '';
 
-        // Read downloadLinks from currentContent (saved by Firebase)
+        const isSeries = currentContent && currentContent.type === 'webseries';
         const downloadLinks = (currentContent && Array.isArray(currentContent.downloadLinks) && currentContent.downloadLinks.length > 0)
             ? currentContent.downloadLinks
             : null;
@@ -2639,40 +2693,78 @@
             noLinks.style.display = 'none';
             linksContainer.style.display = 'block';
 
-            // Quality badge colors
-            const qualityColors = {
-                '4K': '#f59e0b', '1080p': '#10b981', '720p': '#3b82f6',
-                '480p': '#8b5cf6', '360p': '#6b7280', 'CAM': '#ef4444'
-            };
+            if (isSeries) {
+                // Episode wise - label field me episode name hoga
+                sectionLabel.textContent = 'Episode Select Karo';
+                const episodeColors = ['#e50914','#10b981','#3b82f6','#8b5cf6','#f59e0b','#ef4444','#06b6d4','#f97316'];
 
-            downloadLinks.forEach(dl => {
-                const btn = document.createElement('button');
-                const color = qualityColors[dl.quality] || '#3b82f6';
-                btn.style.cssText = `
-                    display:flex;align-items:center;justify-content:space-between;
-                    width:100%;padding:14px 18px;
-                    background:rgba(255,255,255,0.04);
-                    border:1px solid rgba(255,255,255,0.1);
-                    border-radius:14px;color:var(--text-primary);
-                    font-size:15px;font-weight:600;cursor:pointer;
-                    font-family:Poppins,sans-serif;
-                    transition:all 0.2s ease;
-                `;
-                btn.innerHTML = `
-                    <span style="display:flex;align-items:center;gap:12px;">
-                        <span style="background:${color};color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.5px;">${dl.quality}</span>
-                        <span style="color:var(--text-secondary);font-size:13px;font-weight:400;">Tap to Download</span>
-                    </span>
-                    <i class="fas fa-arrow-down" style="color:${color};font-size:14px;"></i>
-                `;
-                btn.addEventListener('click', () => {
-                    const actionKey = 'dl_' + (currentContent?.id || 'item') + '_' + dl.quality;
-                    handleAction(actionKey, () => triggerDownload(dl.url, title, dl.quality));
+                downloadLinks.forEach((dl, idx) => {
+                    const btn = document.createElement('button');
+                    const color = episodeColors[idx % episodeColors.length];
+                    // dl.quality field me admin ne episode name likha hoga e.g. "Episode 1" or "Episode 1-5"
+                    const episodeLabel = dl.quality || dl.episode || ('Episode ' + (idx + 1));
+                    btn.style.cssText = `
+                        display:flex;align-items:center;justify-content:space-between;
+                        width:100%;padding:14px 18px;
+                        background:rgba(255,255,255,0.04);
+                        border:1px solid rgba(255,255,255,0.1);
+                        border-radius:14px;color:var(--text-primary);
+                        font-size:15px;font-weight:600;cursor:pointer;
+                        font-family:Poppins,sans-serif;
+                        transition:all 0.2s ease;
+                    `;
+                    btn.innerHTML = `
+                        <span style="display:flex;align-items:center;gap:12px;">
+                            <span style="background:${color};color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.5px;">📥</span>
+                            <span style="color:var(--text-primary);font-size:14px;font-weight:600;">${episodeLabel}</span>
+                        </span>
+                        <i class="fas fa-arrow-down" style="color:${color};font-size:14px;"></i>
+                    `;
+                    btn.addEventListener('click', () => {
+                        const actionKey = 'dl_' + (currentContent?.id || 'item') + '_ep_' + idx;
+                        handleAction(actionKey, () => triggerDownload(dl.url, title, episodeLabel));
+                    });
+                    btn.addEventListener('mouseover', () => { btn.style.background = `rgba(255,255,255,0.09)`; btn.style.borderColor = color; });
+                    btn.addEventListener('mouseout', () => { btn.style.background = `rgba(255,255,255,0.04)`; btn.style.borderColor = `rgba(255,255,255,0.1)`; });
+                    buttonsDiv.appendChild(btn);
                 });
-                btn.addEventListener('mouseover', () => { btn.style.background = `rgba(255,255,255,0.09)`; btn.style.borderColor = color; });
-                btn.addEventListener('mouseout', () => { btn.style.background = `rgba(255,255,255,0.04)`; btn.style.borderColor = `rgba(255,255,255,0.1)`; });
-                buttonsDiv.appendChild(btn);
-            });
+            } else {
+                // Movie - quality wise (existing logic)
+                sectionLabel.textContent = 'Select Quality';
+                const qualityColors = {
+                    '4K': '#f59e0b', '1080p': '#10b981', '720p': '#3b82f6',
+                    '480p': '#8b5cf6', '360p': '#6b7280', 'CAM': '#ef4444'
+                };
+
+                downloadLinks.forEach(dl => {
+                    const btn = document.createElement('button');
+                    const color = qualityColors[dl.quality] || '#3b82f6';
+                    btn.style.cssText = `
+                        display:flex;align-items:center;justify-content:space-between;
+                        width:100%;padding:14px 18px;
+                        background:rgba(255,255,255,0.04);
+                        border:1px solid rgba(255,255,255,0.1);
+                        border-radius:14px;color:var(--text-primary);
+                        font-size:15px;font-weight:600;cursor:pointer;
+                        font-family:Poppins,sans-serif;
+                        transition:all 0.2s ease;
+                    `;
+                    btn.innerHTML = `
+                        <span style="display:flex;align-items:center;gap:12px;">
+                            <span style="background:${color};color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.5px;">${dl.quality}</span>
+                            <span style="color:var(--text-secondary);font-size:13px;font-weight:400;">Tap to Download</span>
+                        </span>
+                        <i class="fas fa-arrow-down" style="color:${color};font-size:14px;"></i>
+                    `;
+                    btn.addEventListener('click', () => {
+                        const actionKey = 'dl_' + (currentContent?.id || 'item') + '_' + dl.quality;
+                        handleAction(actionKey, () => triggerDownload(dl.url, title, dl.quality));
+                    });
+                    btn.addEventListener('mouseover', () => { btn.style.background = `rgba(255,255,255,0.09)`; btn.style.borderColor = color; });
+                    btn.addEventListener('mouseout', () => { btn.style.background = `rgba(255,255,255,0.04)`; btn.style.borderColor = `rgba(255,255,255,0.1)`; });
+                    buttonsDiv.appendChild(btn);
+                });
+            }
         }
 
         // Show modal
